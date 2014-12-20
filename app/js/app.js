@@ -5,15 +5,12 @@ angular.module("app", []);
 angular.module("app").controller("ctrl", ['$scope', '$http', function($scope, $http) {
 
 	angular.extend($scope, {
-		data: []
-	});
-
-	$http.get('http://localhost:3000/site-produtos?qtd=2&pg=506').success(function(data){
-		angular.extend($scope, {
-			data: data
-		});
-	}).error(function(err){
-		console.log(err);
+		config: {
+      qtd: 2,
+      data: [],
+      exp: '',
+      http: $http
+    }
 	});
 
 }]);
@@ -24,7 +21,7 @@ angular.module('app').directive("pagination", function(){
  			'<nav>' +
   			'<ul class="pagination">' +
     			'<li ng-class="{ disabled: pageFirst() }">' +
-    				'<a href="">' +
+    				'<a href="javascript:void(0)" ng-click="goPageFirst()">' +
     					'<span aria-hidden="true">&laquo;</span>' +
     					'<span class="sr-only">Previous</span>' +
     				'</a>' +
@@ -33,7 +30,7 @@ angular.module('app').directive("pagination", function(){
     				'<a href="javascript:void(0)" ng-click="goPage(pg)">{{pg}}</a>' +
     			'</li>' +
     			'<li ng-class="{ disabled: pageLast() }">' +
-    				'<a href="#">{{data2}}' +
+    				'<a href="javascript:void(0)" ng-click="goPageLast()">{{data2}}' +
     					'<span aria-hidden="true">&raquo;</span>' +
     					'<span class="sr-only">Next</span>' +
     				'</a>' +
@@ -43,71 +40,116 @@ angular.module('app').directive("pagination", function(){
     restrict: "E",
    	replace: true,
     scope: {
-    	data: '='
+    	config: '='
    	},
    	link: function(scope, element, attrs){
 
-   		scope.$watch(attrs.data, function(value) {
-   			if(value.pagina){
-          scope.pagination.all = value.paginacao || 0;
-   				var pages = [];
-   				pages.push(value.pagina);
-          if(value.pagina == 1){
-            pages.push(2);
-            pages.push(3);
-            pages.push(4);
-            pages.push(5);
-          }else if(value.pagina == 2){
-            pages.push(1);
-            pages.push(3);
-            pages.push(4);
-            pages.push(5);
-          }else if(value.pagina == scope.pagination.all){
-            pages.push(value.pagina - 1);
-            pages.push(value.pagina - 2);
-            pages.push(value.pagina - 3);
-            pages.push(value.pagina - 4);
-          }else if((value.pagina + 1) == scope.pagination.all){
-            pages.push(value.pagina + 1);
-            pages.push(value.pagina - 2);
-            pages.push(value.pagina - 3);
-            pages.push(value.pagina - 4);
+      scope.consultar = function(){
+        var url = 'http://104.236.94.137/site-produtos';
+        url = url + '?qtd=' + scope.config.qtd || 20;
+        url = url + '&pg=' + scope.config.pg || 1;
+        url = url + '&exp=' + scope.config.exp || '';
+        scope.config.http.get(url).success(function(data){
+          var pages = [];
+          if(data.pagina == 1){
+            for(var i = 1; i <= 5; i++){
+              if(i <= data.paginacao){
+                pages.push(i);
+              }
+            }
+            pages = pages.sort();
+          }else if(data.pagina == 2){
+            for(var i = 1; i <= 5; i++){
+              if(i <= data.paginacao){
+                pages.push(i);
+              }
+            }
+            pages = pages.sort();
+          }else if(data.pagina == data.paginacao){
+            pages.push(data.pagina);
+            if((data.pagina - 1) > 0){
+              pages.push(data.pagina - 1);
+            }
+            if((data.pagina - 2) > 0){
+              pages.push(data.pagina - 2);
+            }
+            if((data.pagina - 3) > 0){
+              pages.push(data.pagina - 3);
+            }
+            if((data.pagina - 4) > 0){
+              pages.push(data.pagina - 4);
+            }
+            pages = pages.sort();
+          }else if((data.pagina + 1) == data.paginacao){
+            pages.push(data.pagina);
+            pages.push(data.pagina + 1);
+            if((data.pagina - 1) > 0){
+              pages.push(data.pagina - 1);
+            }
+            if((data.pagina - 2) > 0){
+              pages.push(data.pagina - 2);
+            }
+            if((data.pagina - 3) > 0){
+              pages.push(data.pagina - 3);
+            }
+            pages = pages.sort();
           }else{
-            pages.push(value.pagina - 1);
-            pages.push(value.pagina - 2);
-            pages.push(value.pagina + 1);
-            pages.push(value.pagina + 2);
+            if((data.pagina - 2) > 0){
+              pages.push(data.pagina - 2);
+            }
+            if((data.pagina - 1) > 0){
+              pages.push(data.pagina - 1);
+            }
+            pages.push(data.pagina);
+            pages.push(data.pagina + 1);
+            pages.push(data.pagina + 2);
           }
-      		scope.pagination.pages = pages.sort();
-   			}
-    	});
+          scope.config.pages = pages;
+          scope.config.all = data.paginacao;
+          scope.config.pg = data.pagina;
+          scope.config.data = data.produtos;
+        }).error(function(err){
+          console.log(err);
+        });
+      }
 
-   		angular.extend(scope, {
-   			pagination: {
-   				page: 506,
-   				limit: 5
-   			}
-   		});
+      scope.$watch('config.exp', function(value) {
+        scope.config.pg = 1;
+        scope.consultar();
+      });
 
-   		scope.goPage = function(pg){
-   			scope.pagination.page = pg;
-   		};
+      scope.getPages = function(){
+        return scope.config.pages;
+      };
 
-   		scope.getPages = function(){
-   			return scope.pagination.pages;
-   		};
+      scope.pageActive = function(page){
+        return parseInt(page) == parseInt(scope.config.pg);
+      };
 
-   		scope.pageActive = function(page){
-   			return parseInt(page) == parseInt(scope.pagination.page);
-   		};
+      scope.goPage = function(pg){
+        scope.config.pg = pg;
+        scope.consultar();
+      };
 
-   		scope.pageFirst = function(){
-   			return parseInt(scope.pagination.page) == 1;
-   		}
+      scope.goPageFirst = function(){
+        scope.config.pg = 1;
+        scope.consultar();
+      }
 
-   		scope.pageLast = function(){
-   			return parseInt(scope.pagination.page) == parseInt(scope.pagination.all);
-   		}
+      scope.goPageLast = function(){
+        scope.config.pg = scope.config.all;
+        scope.consultar();
+      }
+
+      scope.pageFirst = function(){
+        return parseInt(scope.config.pg) == 1;
+      }
+
+      scope.pageLast = function(){
+        return parseInt(scope.config.pg) == parseInt(scope.config.all);
+      }
+
+      scope.consultar();
 
    	}
  	};

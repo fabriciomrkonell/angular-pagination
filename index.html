@@ -18,10 +18,18 @@
 					</div>
 					<div class="panel panel-default">
 						<div class="panel-body text-center">
-							<pagination data="data"></pagination>
+							<pagination config="config"></pagination>
+							<div class="row">
+								<div class="col-sm-12">
+									<div class="text-center">
+										<input type="text" class="form-control" ng-model="config.exp" />
+									</div>
+								</div>
+							</div>
 						</div>
 					</div>
 				</div>
+				{{config.data}}
 			</div>
 		</div>
 		<script src="app/js/angular.min.js"></script>
