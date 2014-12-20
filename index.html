@@ -28,8 +28,19 @@
 							</div>
 						</div>
 					</div>
+					<div class="row" ng-repeat="obj in config.data" style="margin-bottom:40px">
+						<div class="col-sm-4">
+							<div class="text-center">
+								<img style="width: 200px" ng-src="http://104.236.94.137{{obj.imagem}}"class="img-rounded">
+							</div>
+						</div>
+						<div class="col-sm-8">
+							<div class="text-center">
+								{{obj}}
+							</div>
+						</div>
+					</div>
 				</div>
-				{{config.data}}
 			</div>
 		</div>
 		<script src="app/js/angular.min.js"></script>
