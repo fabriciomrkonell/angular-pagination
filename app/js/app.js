@@ -6,7 +6,7 @@ angular.module("app").controller("ctrl", ['$scope', '$http', function($scope, $h
 
 	angular.extend($scope, {
 		config: {
-      qtd: 2,
+      qtd: 20,
       data: [],
       exp: '',
       http: $http
@@ -127,8 +127,10 @@ angular.module('app').directive("pagination", function(){
       };
 
       scope.goPage = function(pg){
-        scope.config.pg = pg;
-        scope.consultar();
+        if(scope.config.pg != pg){
+          scope.config.pg = pg;
+          scope.consultar();
+        }
       };
 
       scope.goPageFirst = function(){
