@@ -22,19 +22,29 @@ angular.module('app').directive("pagination", function(){
   			'<ul class="pagination">' +
     			'<li ng-class="{ disabled: pageFirst() }">' +
     				'<a href="javascript:void(0)" ng-click="goPageFirst()">' +
-    					'<span aria-hidden="true">&laquo;</span>' +
+    					'<span aria-hidden="true">&laquo;&laquo;</span>' +
     					'<span class="sr-only">Previous</span>' +
     				'</a>' +
     			'</li>' +
+          '<li ng-class="{ disabled: pageFirst() }">' +
+            '<a href="javascript:void(0)" ng-click="goPreviusPage()">' +
+              '<span aria-hidden="true">&laquo;</span>' +
+            '</a>' +
+          '</li>' +
     			'<li ng-class="{ active: pageActive(pg) }" ng-repeat="pg in getPages()">' +
     				'<a href="javascript:void(0)" ng-click="goPage(pg)">{{pg}}</a>' +
     			'</li>' +
     			'<li ng-class="{ disabled: pageLast() }">' +
-    				'<a href="javascript:void(0)" ng-click="goPageLast()">{{data2}}' +
+    				'<a href="javascript:void(0)" ng-click="goNextPage()">{{data2}}' +
     					'<span aria-hidden="true">&raquo;</span>' +
-    					'<span class="sr-only">Next</span>' +
     				'</a>' +
     			'</li>' +
+          '<li ng-class="{ disabled: pageLast() }">' +
+            '<a href="javascript:void(0)" ng-click="goPageLast()">{{data2}}' +
+              '<span aria-hidden="true">&raquo;&raquo;</span>' +
+              '<span class="sr-only">Next</span>' +
+            '</a>' +
+          '</li>' +
   			'</ul>' +
 			'</nav>',
     restrict: "E",
@@ -132,6 +142,20 @@ angular.module('app').directive("pagination", function(){
           scope.consultar();
         }
       };
+
+      scope.goNextPage = function(){
+        if((scope.config.pg + 1) <= scope.config.all) {
+          scope.config.pg = (scope.config.pg + 1);
+          scope.consultar();
+        }
+      }
+
+      scope.goPreviusPage = function(){
+        if((scope.config.pg - 1) >= 1) {
+          scope.config.pg = (scope.config.pg - 1);
+          scope.consultar();
+        }
+      }
 
       scope.goPageFirst = function(){
         scope.config.pg = 1;
